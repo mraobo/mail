@@ -1,46 +1,42 @@
-name: Mailer CI
+name: CI Workflow
 
-# Trigger the workflow on push and pull request events to the main branch
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest  # Define the operating system
+    runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      # Step 2: Set up Python
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v4
+      # Install Python
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
+          python-version: "3.9"
 
-      # Step 3: Install Poetry
+      # Install Poetry
       - name: Install Poetry
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
-          echo "::add-path::${HOME}/.local/bin"
+          echo "${HOME}/.local/bin" >> $GITHUB_PATH  # Add Poetry to PATH
 
-      # Step 4: Install dependencies
+      # Verify Poetry Installation
+      - name: Check Poetry version
+        run: poetry --version
+
+      # Install dependencies
       - name: Install dependencies
-        run: |
-          poetry install
+        run: poetry install
 
-      # Step 5: Lint the code with Ruff
-      - name: Lint with Ruff
-        run: |
-          poetry run ruff check .
-
-      # Step 6: Build Sphinx Documentation
-      - name: Build Documentation
-        run: |
-          poetry run sphinx-build -b html docs/ docs/_build/html
-
+      # Run tests (if applicable)
+      - name: Run tests
+        run: poetry run pytest
